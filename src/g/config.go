@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cihub/seelog"
 )
 
 var (
@@ -135,12 +136,14 @@ func SaveCloudConfig(url string) (Config, error) {
 	Ver := Cfg.Ver
 	Password := Cfg.Password
 	Port := Cfg.Port
+	TCPPort := Cfg.TCPPort
 	Endpoint := Cfg.Mode["Endpoint"]
 	Cfg = config
 	Cfg.Name = Name
 	Cfg.Addr = Addr
 	Cfg.Ver = Ver
 	Cfg.Port = Port
+	Cfg.TCPPort = TCPPort
 	Cfg.Password = Password
 	Cfg.Mode["LastSuccTime"] = time.Now().Format("2006-01-02 15:04:05")
 	Cfg.Mode["Status"] = "true"

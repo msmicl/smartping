@@ -1,14 +1,16 @@
 package funcs
 
 import (
+	"net"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/cihub/seelog"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/nettools"
-	"net"
-	"strconv"
-	"sync"
-	"time"
 )
 
 func Ping() {
@@ -21,17 +23,23 @@ func Ping() {
 	go StartAlert()
 }
 
-//ping main function
+// ping main function
 func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	seelog.Info("Start Ping " + t.Addr + "..")
 	stat := g.PingSt{}
 	stat.MinDelay = -1
 	lossPK := 0
+	var timeout, _ = time.ParseDuration("10s")
 	ipaddr, err := net.ResolveIPAddr("ip", t.Addr)
+	var delay float64 = 0.0
 	if err == nil {
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 1; i++ {
 			starttime := time.Now().UnixNano()
-			delay, err := nettools.RunPing(ipaddr, 3*time.Second, 64, i)
+			if containsPort(ipaddr.String()) {
+				delay, err = nettools.TcpPing(ipaddr, timeout)
+			} else {
+				delay, err = nettools.RunPing(ipaddr, 3*time.Second, 64, i)
+			}
 			if err == nil {
 				stat.AvgDelay = stat.AvgDelay + delay
 				if stat.MaxDelay < delay {
@@ -71,7 +79,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	seelog.Info("Finish Ping " + t.Addr + "..")
 }
 
-//storage ping data
+// storage ping data
 func PingStorage(pingres g.PingSt, Addr string) {
 	logtime := time.Now().Format("2006-01-02 15:04")
 	seelog.Info("[func:StartPing] ", "(", logtime, ")Starting PingStorage ", Addr)
@@ -84,4 +92,12 @@ func PingStorage(pingres g.PingSt, Addr string) {
 	}
 	g.DLock.Unlock()
 	seelog.Info("[func:StartPing] ", "(", logtime, ") Finish PingStorage  ", Addr)
+}
+
+// check if the ip address contains port
+func containsPort(IPAddress string) bool {
+	if strings.Index(IPAddress, ":") > 0 {
+		return true
+	}
+	return false
 }

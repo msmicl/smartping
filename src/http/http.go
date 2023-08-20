@@ -3,20 +3,21 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"regexp"
+	"strings"
+
 	"github.com/cihub/seelog"
 	"github.com/smartping/smartping/src/g"
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
-	"log"
-	"net/http"
-	"os"
-	"regexp"
-	"strings"
 )
 
 func ValidIP4(ipAddress string) bool {
 	ipAddress = strings.Trim(ipAddress, " ")
-	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	// re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]+)?$`)
 	if re.MatchString(ipAddress) {
 		return true
 	}
@@ -84,5 +85,5 @@ func StartHttp() {
 	if err != nil {
 		log.Fatalln("[StartHttp]", err)
 	}
-	os.Exit(0)
+	// os.Exit(0)
 }

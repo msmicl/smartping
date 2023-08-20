@@ -3,11 +3,14 @@ package nettools
 import (
 	"bytes"
 	"encoding/binary"
-	"golang.org/x/net/icmp"
-	"golang.org/x/net/ipv4"
 	"math/rand"
 	"net"
 	"time"
+
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
+
+	"github.com/cihub/seelog"
 )
 
 type pkg struct {
@@ -117,11 +120,24 @@ func RunPing(IpAddr *net.IPAddr, maxrtt time.Duration, maxttl int, seq int) (flo
 	res.maxrtt = maxrtt
 	res.id = rand.Intn(65535)
 	res.seq = seq
-	res.msg = icmp.Message{Type: ipv4.ICMPTypeEcho, Code: 0, Body: &icmp.Echo{ID: res.id, Seq: res.seq, Data: bytes.Repeat([]byte("Go Smart Ping!"), 4) }}
+	res.msg = icmp.Message{Type: ipv4.ICMPTypeEcho, Code: 0, Body: &icmp.Echo{ID: res.id, Seq: res.seq, Data: bytes.Repeat([]byte("Go Smart Ping!"), 4)}}
 	res.netmsg, err = res.msg.Marshal(nil)
 	if nil != err {
 		return 0, err
 	}
 	pingRsult := res.Send(maxttl)
 	return float64(pingRsult.RTT.Nanoseconds()) / 1e6, pingRsult.Error
+}
+
+func TcpPing(IpAddr *net.IPAddr, timeout time.Duration) (float64, error) {
+	var start = time.Now()
+	seelog.Info("TcpPing:", IpAddr.String())
+	conn, err := net.DialTimeout("tcp", IpAddr.String() /*IpAddr.String()*/, timeout)
+	if nil != err {
+		return 0, err
+	}
+
+	var duration = (float64)(time.Since(start).Nanoseconds() / 1e6)
+	defer conn.Close()
+	return duration, nil
 }

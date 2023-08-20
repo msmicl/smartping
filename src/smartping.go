@@ -3,17 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"runtime"
+
 	"github.com/jakecoffman/cron"
 	"github.com/smartping/smartping/src/funcs"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/http"
-	"os"
-	"runtime"
 	//"sync"
 )
 
 // Init config
-var Version = "0.8.0"
+var Version = "0.8.1"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -37,5 +38,6 @@ func main() {
 		go funcs.ClearArchive()
 	}, "mtc")
 	c.Start()
+	go http.StartTcpServer(g.Cfg.TCPPort)
 	http.StartHttp()
 }
