@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"math/rand"
 	"net"
+	"strconv"
 	"time"
 
 	"golang.org/x/net/icmp"
@@ -114,6 +115,7 @@ func (t *pkg) Send(ttl int) ICMP {
 }
 
 func RunPing(IpAddr *net.IPAddr, maxrtt time.Duration, maxttl int, seq int) (float64, error) {
+
 	var res pkg
 	var err error
 	res.dest = IpAddr
@@ -126,18 +128,42 @@ func RunPing(IpAddr *net.IPAddr, maxrtt time.Duration, maxttl int, seq int) (flo
 		return 0, err
 	}
 	pingRsult := res.Send(maxttl)
-	return float64(pingRsult.RTT.Nanoseconds()) / 1e6, pingRsult.Error
+	return float64(pingRsult.RTT.Nanoseconds()) / 1e3, pingRsult.Error
 }
 
-func TcpPing(IpAddr *net.IPAddr, timeout time.Duration) (float64, error) {
+func TcpPing(IpAddr *net.IPAddr, port string, timeout time.Duration, times int) (float64, error) {
 	var start = time.Now()
 	seelog.Info("TcpPing:", IpAddr.String())
-	conn, err := net.DialTimeout("tcp", IpAddr.String() /*IpAddr.String()*/, timeout)
+	conn, err := net.DialTimeout("tcp", IpAddr.String()+":"+port, timeout)
 	if nil != err {
 		return 0, err
 	}
-
-	var duration = (float64)(time.Since(start).Nanoseconds() / 1e6)
 	defer conn.Close()
+	_, err = conn.Write([]byte("Ping"))
+	if nil != err {
+		seelog.Info("TcpPing:", IpAddr.String(), " | err:", err)
+	}
+	if 1 == times {
+		var duration = (float64)(time.Since(start).Nanoseconds() / 1e3)
+		return duration, nil
+	}
+
+	var total_duration int64 = 0
+	var counter int64 = 0
+	for i := 0; i < times-1; i++ {
+		var now = time.Now()
+		_, err := conn.Write([]byte("Ping"))
+		if nil != err {
+			seelog.Info("TcpPing:", IpAddr.String(), " | err:", err)
+			continue
+		}
+		total_duration += time.Since(now).Nanoseconds()
+		counter++
+	}
+
+	var duration = (float64)(total_duration / counter / 1e3)
+	var strDuration = strconv.FormatFloat(duration, 'f', 2, 64)
+	output := "TcpPing:" + IpAddr.String() + ":" + port + " | duration:" + strDuration + "ms"
+	seelog.Info(output)
 	return duration, nil
 }

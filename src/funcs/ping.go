@@ -30,13 +30,21 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	stat.MinDelay = -1
 	lossPK := 0
 	var timeout, _ = time.ParseDuration("10s")
+	if containsPort(t.Addr) {
+
+	}
+	var port string = ""
+	if containsPort(t.Addr) {
+		port = strings.Split(t.Addr, ":")[1]
+		t.Addr = strings.Split(t.Addr, ":")[0]
+	}
 	ipaddr, err := net.ResolveIPAddr("ip", t.Addr)
 	var delay float64 = 0.0
 	if err == nil {
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 20; i++ {
 			starttime := time.Now().UnixNano()
-			if containsPort(ipaddr.String()) {
-				delay, err = nettools.TcpPing(ipaddr, timeout)
+			if port != "" {
+				delay, err = nettools.TcpPing(ipaddr, port, timeout, 2)
 			} else {
 				delay, err = nettools.RunPing(ipaddr, 3*time.Second, 64, i)
 			}
