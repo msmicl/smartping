@@ -10,6 +10,7 @@ import (
 	"github.com/smartping/smartping/src/funcs"
 	"github.com/smartping/smartping/src/g"
 	"github.com/smartping/smartping/src/http"
+	"github.com/smartping/smartping/src/nettools"
 	//"sync"
 )
 
@@ -38,6 +39,6 @@ func main() {
 		go funcs.ClearArchive()
 	}, "mtc")
 	c.Start()
-	go http.StartTcpServer(g.Cfg.TCPPort)
+	go nettools.StartQperfAsServer()
 	http.StartHttp()
 }

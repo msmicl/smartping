@@ -29,10 +29,6 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	stat := g.PingSt{}
 	stat.MinDelay = -1
 	lossPK := 0
-	var timeout, _ = time.ParseDuration("10s")
-	if containsPort(t.Addr) {
-
-	}
 	var port string = ""
 	if containsPort(t.Addr) {
 		port = strings.Split(t.Addr, ":")[1]
@@ -44,7 +40,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 		for i := 0; i < 20; i++ {
 			starttime := time.Now().UnixNano()
 			if port != "" {
-				delay, err = nettools.TcpPing(ipaddr, port, timeout, 2)
+				delay, err = nettools.QperfPing(ipaddr.IP.String())
 			} else {
 				delay, err = nettools.RunPing(ipaddr, 3*time.Second, 64, i)
 			}
