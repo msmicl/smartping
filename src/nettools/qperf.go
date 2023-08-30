@@ -1,6 +1,7 @@
 package nettools
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -58,6 +59,6 @@ func QperfPing(ipAddr string) (float64, error) {
 	if unit == " us" {
 		latency = latency / 1e3
 	}
-
+	seelog.Info(fmt.Sprintf("qperf ping %s latency %.2f ms", ipAddr, latency))
 	return latency, nil
 }
