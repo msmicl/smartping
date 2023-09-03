@@ -67,6 +67,9 @@ func configApiRoutes() {
 		var timeStartStr string
 		var timeEndStr string
 		tableip = r.Form["ip"][0]
+		if strings.Contains(tableip, ":") {
+			tableip = strings.Split(tableip, ":")[0]
+		}
 		if len(r.Form["starttime"]) > 0 && len(r.Form["endtime"]) > 0 {
 			timeStartStr = r.Form["starttime"][0]
 			if timeStartStr != "" {
@@ -126,6 +129,7 @@ func configApiRoutes() {
 						mindelay[n] = l.Mindelay
 						avgdelay[n] = l.Avgdelay
 						losspk[n] = l.Losspk
+						println(fmt.Sprintf("Maxdelay=%s, Mindelay=%s, Avgdelay=%s, Losspk=%s", l.Maxdelay, l.Mindelay, l.Avgdelay, l.Losspk))
 						break
 					}
 				}
