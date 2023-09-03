@@ -24,6 +24,47 @@
     </p>    
 </p>
 
+## 针对 Azure 网络的改进
+
+Azure 网络不支持ping 的ICMP 协议，因为ICMP 协议无法通过Azure 基础网络的网关。因此，需要使用其他的方式测定Azure 网络延迟。本次改进将使用CentOS 自带的qperf 测定网络延迟，替换掉smartping 内置的ICMP 协议的方式。
+
+qperf 工具在CentOS/RHEL 操作系统中已经存在了十几年了，稳定、可靠。qperf 的[**源代码在这里**](https://www.github.com/linux-rdma/qperf)。
+
+改进后的smartping 强依赖qperf 工具，因此在部署改进版smartping 之前，需要在smartping 运行节点上先安装qperf：
+
+``` bash
+sudo yum install -y qperf
+```
+
+然后，请从当前repository 拉取smartping 的最新代码：
+
+``` bash
+sudo git clone https://www.github.com/msmicl/smartping.git
+```
+
+当前版本的代码，在qperf分支中，请先切换分支再进行构建：
+
+``` bash
+# 切换分支
+sudo git switch -c qperf remotes/origin/qperf
+
+# 构建smartping
+cd smartping/src
+sudo go build
+
+```
+qperf 工具默认使用19765 端口进行通信，请确保测试机器防火墙的19765 端口的TCP 入栈方向开放。
+
+在设置界面，添加测试IP地址的时候，请在指定IP地址的同时指定19765 端口，如图：
+![Add Node](add_node.png)
+
+以便确保该IP地址使用qperf 工具进行测试。若不指定端口，则会采用默认的ICMP 协议去ping 主机IP地址。
+
+其他部分，比如服务的启动、停止，smartping 服务的安装等，均按照原有说明操作。
+
+---
+
+
 ## 功能 ##
 
 - 正向PING，反向Ping绘图
