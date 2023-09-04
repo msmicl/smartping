@@ -31,16 +31,29 @@ func configApiRoutes() {
 		}
 		r.ParseForm()
 		nconf := g.Config{}
-		if strings.Contains(g.Cfg.Addr, ":") {
-			g.Cfg.Addr = strings.Split(g.Cfg.Addr, ":")[0]
-		}
-		for k, v := range g.Cfg.Network {
-			if strings.Contains(g.Cfg.Network[k].Addr, ":") {
-				newAddr := strings.Split(g.Cfg.Network[k].Addr, ":")[0]
-				v.Addr = newAddr
-				g.Cfg.Network[k] = v
-			}
-		}
+		// if strings.Contains(g.Cfg.Addr, ":") {
+		// 	g.Cfg.Addr = strings.Split(g.Cfg.Addr, ":")[0]
+		// }
+		// for k, v := range g.Cfg.Network {
+		// 	if strings.Contains(g.Cfg.Network[k].Addr, ":") {
+		// 		newAddr := strings.Split(g.Cfg.Network[k].Addr, ":")[0]
+		// 		v.Addr = newAddr
+		// 		g.Cfg.Network[k] = v
+		// 	}
+		// 	for i := 0; i < len(g.Cfg.Network[k].Ping); i++ {
+		// 		if strings.Contains(g.Cfg.Network[k].Ping[i], ":") {
+		// 			newAddr := strings.Split(g.Cfg.Network[k].Ping[i], ":")[0]
+		// 			g.Cfg.Network[k].Ping[i] = newAddr
+		// 		}
+		// 	}
+		// 	for tk, tv := range v.Topology {
+		// 		if strings.Contains(g.Cfg.Network[k].Topology[tk]["Addr"], ":") {
+		// 			newAddr := strings.Split(g.Cfg.Network[k].Topology[tk]["Addr"], ":")[0]
+		// 			tv["Addr"] = newAddr
+		// 			g.Cfg.Network[k].Topology[tk] = tv
+		// 		}
+		// 	}
+		// }
 		cfgJson, _ := json.Marshal(g.Cfg)
 		json.Unmarshal(cfgJson, &nconf)
 		nconf.Password = ""

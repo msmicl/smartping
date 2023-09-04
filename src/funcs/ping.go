@@ -3,7 +3,6 @@ package funcs
 import (
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -29,21 +28,13 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	stat := g.PingSt{}
 	stat.MinDelay = -1
 	lossPK := 0
-	var port string = ""
-	if containsPort(t.Addr) {
-		port = strings.Split(t.Addr, ":")[1]
-		t.Addr = strings.Split(t.Addr, ":")[0]
-	}
 	ipaddr, err := net.ResolveIPAddr("ip", t.Addr)
 	var delay float64 = 0.0
 	if err == nil {
 		for i := 0; i < 20; i++ {
 			starttime := time.Now().UnixNano()
-			if port != "" {
-				delay, err = nettools.QperfPing(ipaddr.IP.String())
-			} else {
-				delay, err = nettools.RunPing(ipaddr, 3*time.Second, 64, i)
-			}
+			// force all target to use qperf ping.
+			delay, err = nettools.QperfPing(ipaddr.IP.String())
 			if err == nil {
 				stat.AvgDelay = stat.AvgDelay + delay
 				if stat.MaxDelay < delay {
@@ -96,12 +87,4 @@ func PingStorage(pingres g.PingSt, Addr string) {
 	}
 	g.DLock.Unlock()
 	seelog.Info("[func:StartPing] ", "(", logtime, ") Finish PingStorage  ", Addr)
-}
-
-// check if the ip address contains port
-func containsPort(IPAddress string) bool {
-	if strings.Index(IPAddress, ":") > 0 {
-		return true
-	}
-	return false
 }
