@@ -644,7 +644,7 @@ func configApiRoutes() {
 			},
 			XAxis: chart.XAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				TickPosition: chart.TickPositionBetweenTicks,
@@ -654,7 +654,7 @@ func configApiRoutes() {
 			},
 			YAxis: chart.YAxis{
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
@@ -671,12 +671,12 @@ func configApiRoutes() {
 			YAxisSecondary: chart.YAxis{
 				//NameStyle: chart.StyleShow(),
 				Style: chart.Style{
-					//Show:     true,
+					Show:     true,
 					FontSize: 20,
 				},
 				Range: &chart.ContinuousRange{
 					Min: 0.0,
-					Max: MaxDelay + MaxDelay/10,
+					Max: MaxDelay + MaxDelay/10 + 0.9,
 				},
 				ValueFormatter: func(v interface{}) string {
 					if vf, isFloat := v.(float64); isFloat {
@@ -688,7 +688,7 @@ func configApiRoutes() {
 			Series: []chart.Series{
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{249, 246, 241, 255},
 						FillColor:   drawing.Color{249, 246, 241, 255},
 					},
@@ -697,7 +697,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{0, 204, 102, 200},
 						FillColor:   drawing.Color{0, 204, 102, 200},
 					},
@@ -707,7 +707,7 @@ func configApiRoutes() {
 				},
 				chart.ContinuousSeries{
 					Style: chart.Style{
-						//Show:        true,
+						Show:        true,
 						StrokeColor: drawing.Color{255, 0, 0, 200},
 						FillColor:   drawing.Color{255, 0, 0, 200},
 					},
@@ -716,8 +716,10 @@ func configApiRoutes() {
 				},
 			},
 		}
-		graph.Render(chart.PNG, w)
-
+		err = graph.Render(chart.PNG, w)
+		if err != nil {
+			seelog.Info("Image rendering with error:" + err.Error())
+		}
 	})
 
 	//代理访问
