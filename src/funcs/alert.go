@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cihub/seelog"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/smartping/smartping/src/g"
-	"github.com/smartping/smartping/src/nettools"
 	"net/smtp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cihub/seelog"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/smartping/smartping/src/g"
+	"github.com/smartping/smartping/src/nettools"
 )
 
 func StartAlert() {
@@ -65,7 +66,9 @@ func CheckAlertStatus(v map[string]string) bool {
 	timeStartStr := time.Unix((time.Now().Unix() - int64(Thdchecksec)), 0).Format("2006-01-02 15:04")
 	querysql := "SELECT count(1) cnt FROM  `pinglog` where logtime > '" + timeStartStr + "' and target = '" + v["Addr"] + "' and (cast(avgdelay as double) > " + v["Thdavgdelay"] + " or cast(losspk as double) > " + v["Thdloss"] + ") "
 	rows, err := g.Db.Query(querysql)
-	defer rows.Close()
+	if rows != nil {
+		defer rows.Close()
+	}
 	seelog.Debug("[func:StartAlert] ", querysql)
 	if err != nil {
 		seelog.Error("[func:StartAlert] Query Error ", err)
