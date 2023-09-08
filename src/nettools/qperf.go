@@ -11,6 +11,7 @@ import (
 )
 
 func StartQperfAsServer() {
+	cleanQPerfServer()
 	cmd := exec.Command("qperf")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,7 +35,7 @@ func QperfPing(ipAddr string) (float64, error) {
 	cmd := exec.Command("qperf", ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		println(string(err.Error()))
+		println(string(err.Error()) + " " + string(output))
 		return 0, err
 	}
 	result := string(output)
@@ -61,4 +62,49 @@ func QperfPing(ipAddr string) (float64, error) {
 	}
 	seelog.Info(fmt.Sprintf("qperf ping %s latency %.2f ms", ipAddr, latency))
 	return latency, nil
+}
+
+func cleanQPerfServer() {
+	grep := exec.Command("grep", "qperf")
+	ps := exec.Command("ps", "-a")
+
+	// Get ps's stdout and attach it to grep's stdin.
+	pipe, _ := ps.StdoutPipe()
+	defer pipe.Close()
+
+	grep.Stdin = pipe
+
+	// Run ps first.
+	ps.Start()
+
+	// Run and get the output of grep.
+	qperfres, err := grep.Output()
+	if err != nil {
+		fmt.Println("grep failed. " + string(err.Error()))
+		return
+	}
+	fmt.Println(string(qperfres))
+	lines := strings.Split(string(qperfres), "\n")
+	for _, line := range lines {
+		if line == "" {
+			break
+		}
+		cmdtext := line[len(line)-5:]
+		if cmdtext == "qperf" {
+			pid := strings.Split(line, " ")[0]
+			if len(pid) > 0 {
+				killQperf(pid)
+			}
+		}
+	}
+}
+
+func killQperf(pid string) {
+	cmd := exec.Command("sudo", "kill", pid)
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Kill " + pid + " error: " + string(err.Error()))
+	} else {
+		fmt.Println("Kill qperf succeeded.")
+	}
 }
