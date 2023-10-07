@@ -16,15 +16,21 @@ require (
 	github.com/smartping/smartping/src/funcs v0.0.0-00010101000000-000000000000
 	github.com/smartping/smartping/src/g v0.0.0-00010101000000-000000000000
 	github.com/smartping/smartping/src/http v0.0.0-00010101000000-000000000000
+	github.com/smartping/smartping/src/nettools v0.0.0-00010101000000-000000000000
 )
 
 require (
+	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/lucas-clemente/quic-go v0.20.1 // indirect
+	github.com/marten-seemann/qtls-go1-15 v0.1.4 // indirect
+	github.com/marten-seemann/qtls-go1-16 v0.1.3 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
-	github.com/smartping/smartping/src/nettools v0.0.0-00010101000000-000000000000 // indirect
 	github.com/wcharczuk/go-chart v2.0.1+incompatible // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/image v0.11.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 )
