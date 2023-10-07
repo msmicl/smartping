@@ -18,6 +18,7 @@ func StartQperfAsServer() {
 		println(err.Error())
 	}
 	print(string(output))
+
 	seelog.Info("qperf server started successfully.")
 }
 

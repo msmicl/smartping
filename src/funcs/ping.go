@@ -1,6 +1,7 @@
 package funcs
 
 import (
+	"math/rand"
 	"net"
 	"strconv"
 	"sync"
@@ -30,9 +31,9 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	lossPK := 0
 	ipaddr, err := net.ResolveIPAddr("ip", t.Addr)
 	var delay float64 = 0.0
+	var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	if err == nil {
 		for i := 0; i < 10; i++ {
-			starttime := time.Now().UnixNano()
 			// force all target to use qperf ping.
 			delay, err = nettools.QperfPing(ipaddr.IP.String())
 			if err == nil {
@@ -51,9 +52,8 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 			}
 			stat.SendPk = stat.SendPk + 1
 			stat.LossPk = int((float64(lossPK) / float64(stat.SendPk)) * 100)
-			duringtime := time.Now().UnixNano() - starttime
-			// time.Sleep(time.Duration(3000*1000000-duringtime) * time.Nanosecond)
-			time.Sleep(time.Duration(time.Duration.Milliseconds(800)))
+			var duration = rnd.Intn(1500)
+			time.Sleep(time.Duration(time.Duration.Milliseconds(time.Duration(duration))))
 		}
 		if stat.RevcPk > 0 {
 			stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)

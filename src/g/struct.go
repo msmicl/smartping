@@ -3,7 +3,7 @@ package g
 type Config struct {
 	Ver        string
 	Port       int
-	TCPPort    int
+	QperfPort  int
 	Name       string
 	Addr       string
 	Mode       map[string]string

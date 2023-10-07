@@ -523,7 +523,7 @@ func configApiRoutes() {
 		}
 		nconfig.Ver = g.Cfg.Ver
 		nconfig.Port = g.Cfg.Port
-		nconfig.TCPPort = g.Cfg.TCPPort
+		nconfig.QperfPort = g.Cfg.QperfPort
 		nconfig.Password = g.Cfg.Password
 		if nconfig.Alert["SendEmailPassword"] == "samepasswordasbefore" {
 			nconfig.Alert["SendEmailPassword"] = g.Cfg.Alert["SendEmailPassword"]
