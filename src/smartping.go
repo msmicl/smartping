@@ -40,5 +40,6 @@ func main() {
 	}, "mtc")
 	c.Start()
 	go nettools.StartQperfAsServer()
+	go nettools.CheckQperfStatus()
 	http.StartHttp()
 }

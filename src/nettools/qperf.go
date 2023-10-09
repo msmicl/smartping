@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cihub/seelog"
 )
@@ -107,5 +108,19 @@ func killQperf(pid string) {
 		fmt.Println("Kill " + pid + " error: " + string(err.Error()))
 	} else {
 		fmt.Println("Kill qperf succeeded.")
+	}
+}
+
+func CheckQperfStatus() {
+
+	for {
+		time.Sleep(10 * time.Second)
+		cmd := exec.Command("qperf", "127.0.0.1", "tcp_lat")
+		output, err := cmd.CombinedOutput()
+		if err == nil {
+			if strings.Contains(string(output), "failed to connect") {
+				go StartQperfAsServer()
+			}
+		}
 	}
 }
