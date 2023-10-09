@@ -19,7 +19,7 @@ func StartQperfAsServer() {
 		println(err.Error())
 	}
 	print(string(output))
-
+	fmt.Println("qperf server started successfully.")
 	seelog.Info("qperf server started successfully.")
 }
 
@@ -116,11 +116,10 @@ func CheckQperfStatus() {
 	for {
 		time.Sleep(10 * time.Second)
 		cmd := exec.Command("qperf", "127.0.0.1", "tcp_lat")
-		output, err := cmd.CombinedOutput()
-		if err == nil {
-			if strings.Contains(string(output), "failed to connect") {
-				go StartQperfAsServer()
-			}
+		output, _ := cmd.CombinedOutput()
+		if strings.Contains(string(output), "failed to connect") {
+			fmt.Println("qperf server is not running correctly, restart it now.")
+			go StartQperfAsServer()
 		}
 	}
 }
