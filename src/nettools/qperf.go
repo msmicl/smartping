@@ -34,6 +34,7 @@ func installQperf() {
 }
 
 func QperfPing(ipAddr string) (float64, error) {
+	fmt.Println("Command: qperf " + ipAddr + " tcp_lat")
 	cmd := exec.Command("qperf", ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
