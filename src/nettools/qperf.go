@@ -114,11 +114,11 @@ func killQperf(pid string) {
 
 func CheckQperfStatus() {
 	for {
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Second)
 		fmt.Println("Checking qperf server status...")
 		cmd := exec.Command("qperf", "127.0.0.1", "tcp_lat")
-		output, _ := cmd.CombinedOutput()
-		if strings.Contains(string(output), "failed to connect") {
+		output, err := cmd.CombinedOutput()
+		if strings.Contains(string(output), "failed to connect") || err != nil {
 			fmt.Println("qperf server is not running correctly, restart it now.")
 			go StartQperfAsServer()
 		} else {
