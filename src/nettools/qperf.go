@@ -130,8 +130,8 @@ func CheckQperfStatus() {
 func getProcId(line string) string {
 	cols := strings.Split(line, " ")
 	for _, col := range cols {
-		if pid, err := strconv.Atoi(col); err == nil {
-			return pid
+		if _, err := strconv.Atoi(col); err == nil {
+			return col
 		}
 	}
 	return ""
