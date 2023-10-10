@@ -44,9 +44,9 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 					stat.MinDelay = delay
 				}
 				stat.RevcPk = stat.RevcPk + 1
-				seelog.Debug("[func:StartPing IcmpPing] ID:", i, " IP:", t.Addr)
+				seelog.Debug("[func:StartPing qperf ping] ID:", i, " IP:", t.Addr)
 			} else {
-				seelog.Debug("[func:StartPing IcmpPing] ID:", i, " IP:", t.Addr, "| err:", err)
+				seelog.Debug("[func:StartPing qperf ping] ID:", i, " IP:", t.Addr, "| err:", err)
 				lossPK = lossPK + 1
 			}
 			stat.SendPk = stat.SendPk + 1

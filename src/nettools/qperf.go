@@ -38,8 +38,8 @@ func QperfPing(ipAddr string) (float64, error) {
 	cmd := exec.Command("qperf", ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		println(string(err.Error()) + " " + string(output))
-		return 0, err
+		println("Qperf ping error: " + string(err.Error()) + " " + string(output))
+		return 0, nil
 	}
 	result := string(output)
 	index := strings.Index(result, "latency  =  ") + strings.Count("latency  =  ", "") - 1
@@ -57,8 +57,8 @@ func QperfPing(ipAddr string) (float64, error) {
 	temp = temp[:index]
 	latency, err = strconv.ParseFloat(temp, 32)
 	if err != nil {
-		println(string(err.Error()))
-		return 0, err
+		println("qperf get latency error: " + string(err.Error()))
+		return 0, nil
 	}
 	if unit == " us" {
 		latency = latency / 1e3
