@@ -56,13 +56,13 @@ func QperfPing(ipAddr string) (float64, error) {
 	latency, err = strconv.ParseFloat(temp, 32)
 	if err != nil {
 		println("qperf get latency error: " + string(err.Error()))
-		return 0, nil
+		return 0, err
 	}
 	if unit == " us" {
 		latency = latency / 1e3
 	}
 	seelog.Info(fmt.Sprintf("qperf ping %s latency %.2f ms", ipAddr, latency))
-	return latency, nil
+	return latency, err
 }
 
 func cleanQPerfServer() {
