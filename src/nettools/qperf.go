@@ -93,7 +93,11 @@ func cleanQPerfServer() {
 		}
 		cmdtext := line[len(line)-5:]
 		if cmdtext == "qperf" {
-			pid := strings.Split(line, " ")[1]
+			cols := strings.Split(line, " ")
+			for _, col := range cols {
+				fmt.Println(col)
+			}
+			pid := strings.Split(line, " ")[0]
 			fmt.Println("qperf pid: " + pid)
 			if len(pid) > 0 {
 				killQperf(pid)
@@ -113,14 +117,16 @@ func killQperf(pid string) {
 }
 
 func CheckQperfStatus() {
-
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(30 * time.Second)
+		fmt.Println("Checking qperf server status...")
 		cmd := exec.Command("qperf", "127.0.0.1", "tcp_lat")
 		output, _ := cmd.CombinedOutput()
 		if strings.Contains(string(output), "failed to connect") {
 			fmt.Println("qperf server is not running correctly, restart it now.")
 			go StartQperfAsServer()
+		} else {
+			fmt.Println("Qperf server is OK.")
 		}
 	}
 }
