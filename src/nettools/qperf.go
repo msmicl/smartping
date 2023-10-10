@@ -93,11 +93,7 @@ func cleanQPerfServer() {
 		}
 		cmdtext := line[len(line)-5:]
 		if cmdtext == "qperf" {
-			cols := strings.Split(line, " ")
-			for _, col := range cols {
-				fmt.Println(col)
-			}
-			pid := strings.Split(line, " ")[1]
+			pid := getProcId(line)
 			fmt.Println("qperf pid: " + pid)
 			if len(pid) > 0 {
 				killQperf(pid)
@@ -129,4 +125,14 @@ func CheckQperfStatus() {
 			fmt.Println("Qperf server is OK.")
 		}
 	}
+}
+
+func getProcId(line string) string {
+	cols := strings.Split(line, " ")
+	for _, col := range cols {
+		if pid, err := strconv.Atoi(col); err == nil {
+			return pid
+		}
+	}
+	return ""
 }
