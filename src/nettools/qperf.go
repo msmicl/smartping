@@ -97,7 +97,7 @@ func cleanQPerfServer() {
 			for _, col := range cols {
 				fmt.Println(col)
 			}
-			pid := strings.Split(line, " ")[0]
+			pid := strings.Split(line, " ")[1]
 			fmt.Println("qperf pid: " + pid)
 			if len(pid) > 0 {
 				killQperf(pid)
