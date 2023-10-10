@@ -18,9 +18,7 @@ func StartQperfAsServer() {
 	if err != nil {
 		println(err.Error())
 	}
-	print(string(output))
 	fmt.Println("qperf server started successfully.")
-	seelog.Info("qperf server started successfully.")
 }
 
 func installQperf() {
@@ -86,7 +84,7 @@ func cleanQPerfServer() {
 		fmt.Println("grep failed. " + string(err.Error()))
 		return
 	}
-	fmt.Println(string(qperfres))
+	// fmt.Println(string(qperfres))
 	lines := strings.Split(string(qperfres), "\n")
 	for _, line := range lines {
 		if line == "" {
