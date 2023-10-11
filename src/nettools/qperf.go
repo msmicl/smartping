@@ -9,11 +9,16 @@ import (
 	"time"
 
 	"github.com/cihub/seelog"
+	"github.com/smartping/smartping/src/g"
 )
+
+var qperfPort = "19765"
 
 func StartQperfAsServer() {
 	cleanQPerfServer()
-	cmd := exec.Command("qperf")
+	qperfPort = strconv.Itoa(g.Cfg.QperfPort)
+	fmt.Println("qperf server start listening port: " + qperfPort)
+	cmd := exec.Command("qperf", "--listen_port", qperfPort)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
 		println(err.Error())
@@ -32,11 +37,11 @@ func installQperf() {
 }
 
 func QperfPing(ipAddr string) (float64, error) {
-	fmt.Println("Command: qperf " + ipAddr + " tcp_lat")
-	cmd := exec.Command("qperf", ipAddr, "tcp_lat")
+	fmt.Println("Command: qperf " + "--listen_port" + qperfPort + " " + ipAddr + " tcp_lat")
+	cmd := exec.Command("qperf", "--listen_port", qperfPort, ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		if strings.Contains(string(output), "time out") {
+		if strings.Contains(string(output), "timed out") {
 			return 0, err
 		}
 		println("Qperf ping error: " + string(err.Error()) + " " + string(output))
@@ -96,7 +101,6 @@ func cleanQPerfServer() {
 		cmdtext := line[len(line)-5:]
 		if cmdtext == "qperf" {
 			pid := getProcId(line)
-			fmt.Println("qperf pid: " + pid)
 			if len(pid) > 0 {
 				killQperf(pid)
 			}
@@ -105,9 +109,10 @@ func cleanQPerfServer() {
 }
 
 func killQperf(pid string) {
-	if "" == pid {
+	if pid == "" {
 		return
 	}
+	fmt.Println("qperf pid: " + pid)
 	cmd := exec.Command("sudo", "kill", pid)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
@@ -121,7 +126,7 @@ func CheckQperfStatus() {
 	for {
 		time.Sleep(10 * time.Second)
 		fmt.Println("Checking qperf server status...")
-		cmd := exec.Command("qperf", "127.0.0.1", "tcp_lat")
+		cmd := exec.Command("qperf", "--listen_port", qperfPort, "127.0.0.1", "tcp_lat")
 		output, err := cmd.CombinedOutput()
 		if strings.Contains(string(output), "failed to connect") || err != nil {
 			fmt.Println("qperf server is not running correctly, restart it now.")
@@ -133,6 +138,7 @@ func CheckQperfStatus() {
 }
 
 func getProcId(line string) string {
+	// In ps -a outputs, the first digits column is the pid.
 	cols := strings.Split(line, " ")
 	for _, col := range cols {
 		if _, err := strconv.Atoi(col); err == nil {
