@@ -41,7 +41,7 @@ func QperfPing(ipAddr string) (float64, error) {
 	cmd := exec.Command("qperf", "--listen_port", qperfPort, ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		if strings.Contains(string(output), "timed out") {
+		if strings.Contains(string(output), "time out") {
 			return 0, err
 		}
 		println("Qperf ping error: " + string(err.Error()) + " " + string(output))
