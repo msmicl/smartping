@@ -14,7 +14,7 @@ import (
 func StartQperfAsServer() {
 	cleanQPerfServer()
 	cmd := exec.Command("qperf")
-	output, err := cmd.CombinedOutput()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		println(err.Error())
 	}
