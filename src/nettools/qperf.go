@@ -36,6 +36,9 @@ func QperfPing(ipAddr string) (float64, error) {
 	cmd := exec.Command("qperf", ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		if strings.Contains(string(output), "time out") {
+			return 0, err
+		}
 		println("Qperf ping error: " + string(err.Error()) + " " + string(output))
 		return 0, nil
 	}
@@ -102,6 +105,9 @@ func cleanQPerfServer() {
 }
 
 func killQperf(pid string) {
+	if "" == pid {
+		return
+	}
 	cmd := exec.Command("sudo", "kill", pid)
 	_, err := cmd.CombinedOutput()
 	if err != nil {

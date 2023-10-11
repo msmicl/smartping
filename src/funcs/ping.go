@@ -32,7 +32,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	var delay float64 = 0.0
 	// var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	if err == nil {
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 8; i++ {
 			// force all target to use qperf ping.
 			delay, err = nettools.QperfPing(ipaddr.IP.String())
 			if err == nil {
@@ -51,7 +51,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 			}
 			stat.SendPk = stat.SendPk + 1
 			stat.LossPk = int((float64(lossPK) / float64(stat.SendPk)) * 100)
-			var duration = 1000 //rnd.Intn(1500)
+			var duration = 1500 //rnd.Intn(1500)
 			time.Sleep(time.Duration(time.Duration.Milliseconds(time.Duration(duration))))
 		}
 		if stat.RevcPk > 0 {
@@ -59,7 +59,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 		} else {
 			stat.AvgDelay = 0.0
 		}
-		seelog.Debug("[func:IcmpPing] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
+		seelog.Debug("[func:qperf ping] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
 	} else {
 		stat.AvgDelay = 0.00
 		stat.MinDelay = 0.00
@@ -67,7 +67,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 		stat.SendPk = 0
 		stat.RevcPk = 0
 		stat.LossPk = 100
-		seelog.Debug("[func:IcmpPing] Finish Addr:", t.Addr, " Unable to resolve destination host")
+		seelog.Debug("[func:qperf ping] Finish Addr:", t.Addr, " Unable to resolve destination host")
 	}
 	PingStorage(stat, t.Addr)
 	wg.Done()
