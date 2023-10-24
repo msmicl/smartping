@@ -37,14 +37,15 @@ func installQperf() {
 }
 
 func QperfPing(ipAddr string) (float64, error) {
-	fmt.Println("Command: qperf " + "--listen_port" + qperfPort + " " + ipAddr + " tcp_lat")
+	fmt.Println("Command: qperf " + "--listen_port " + qperfPort + " " + ipAddr + " tcp_lat")
 	cmd := exec.Command("qperf", "--listen_port", qperfPort, ipAddr, "tcp_lat")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(output), "time out") {
 			return 0, err
 		}
-		println("Qperf ping error: " + string(err.Error()) + " " + string(output))
+		println("Qperf ping error output: " + string(output))
+		println("Qperf error details: " + string(err.Error()))
 		return 0, nil
 	}
 	result := string(output)
