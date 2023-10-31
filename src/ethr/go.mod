@@ -1,4 +1,4 @@
-module ethr
+module github.com/msmicl/smartping/src/ethr
 
 require (
 	github.com/mattn/go-runewidth v0.0.9
