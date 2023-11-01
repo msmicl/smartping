@@ -15,7 +15,7 @@ import (
 )
 
 // Init config
-var Version = "0.8.2"
+var Version = "0.8.3"
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())

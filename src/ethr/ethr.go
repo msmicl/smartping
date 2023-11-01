@@ -33,7 +33,7 @@ func StartEthrService(port int) {
 	// Server side parameter processing.
 	// var testType EthrTestType
 	// testType = All
-	serverParam := ethrServerParam{true}
+	serverParam := ethrServerParam{false}
 	runServer(serverParam)
 }
 
