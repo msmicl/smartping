@@ -136,14 +136,14 @@ func SaveCloudConfig(url string) (Config, error) {
 	Ver := Cfg.Ver
 	Password := Cfg.Password
 	Port := Cfg.Port
-	QperfPort := Cfg.QperfPort
+	EthrPort := Cfg.EthrPort
 	Endpoint := Cfg.Mode["Endpoint"]
 	Cfg = config
 	Cfg.Name = Name
 	Cfg.Addr = Addr
 	Cfg.Ver = Ver
 	Cfg.Port = Port
-	Cfg.QperfPort = QperfPort
+	Cfg.EthrPort = EthrPort
 	Cfg.Password = Password
 	Cfg.Mode["LastSuccTime"] = time.Now().Format("2006-01-02 15:04:05")
 	Cfg.Mode["Status"] = "true"

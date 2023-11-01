@@ -4,10 +4,12 @@ import (
 	"time"
 
 	"github.com/msmicl/smartping/src/ethr"
+	"github.com/smartping/smartping/src/g"
 )
 
 func StartEthrServer() {
-	ethr.StartEthrService(8888)
+	var ethrPort = g.Cfg.EthrPort
+	ethr.StartEthrService(ethrPort)
 }
 
 func EthrPing(ip string, port int) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {

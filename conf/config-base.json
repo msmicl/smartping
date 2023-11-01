@@ -1,7 +1,7 @@
 {
 	"Ver": "0.8.0",
 	"Port": 8899,
-	"QperfPort": 8898,
+	"EthrPort": 8898,
 	"Name": "本机",
 	"Addr": "127.0.0.1",
 	"Mode": {

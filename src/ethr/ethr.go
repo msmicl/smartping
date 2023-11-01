@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,7 +28,8 @@ var (
 func StartEthrService(port int) {
 	// Server
 	fmt.Println("Ethr service port: ", port)
-
+	gEthrPort = uint16(port)
+	gEthrPortStr = strconv.Itoa(port)
 	// Server side parameter processing.
 	// var testType EthrTestType
 	// testType = All
@@ -54,7 +56,7 @@ func EthrPing(ipAddress string, port int) (uint32, uint32, uint32, time.Duration
 	validateClientParams(testId, clientParam)
 
 	rServer := destination
-	return runSmartPingClient(testId, "", clientParam, rServer)
+	return runSmartPingClient(testId, "", clientParam, rServer+":"+strconv.Itoa(port))
 }
 
 func main() {
