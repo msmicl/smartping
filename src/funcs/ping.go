@@ -34,7 +34,7 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 		sent, rcvd, lost, avg, min, max := nettools.EthrPing(ipaddr.IP.String(), ethrPort)
 		stat.SendPk = int(sent)
 		stat.RevcPk = int(rcvd)
-		stat.LossPk = int(lost) / sent * 100
+		stat.LossPk = int(lost) / int(sent) * 100
 		stat.AvgDelay = float64(avg.Nanoseconds()) / 1e6
 		stat.MinDelay = float64(min.Nanoseconds()) / 1e6
 		stat.MaxDelay = float64(max.Nanoseconds()) / 1e6
