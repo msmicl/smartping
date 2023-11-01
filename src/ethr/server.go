@@ -45,7 +45,7 @@ func runServer(serverParam ethrServerParam) {
 	showAcceptedIPVersion()
 	ui.printMsg("Listening on port %d for TCP & UDP", gEthrPort)
 	srvrRunUDPServer()
-	gLocalIP = "127.0.0.1"
+	gLocalIP = ""
 	gEthrPortStr = fmt.Sprintf("%d", gEthrPort)
 	err := srvrRunTCPServer()
 	if err != nil {
