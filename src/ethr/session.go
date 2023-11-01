@@ -12,7 +12,6 @@ import (
 	"encoding/gob"
 	"io"
 	"net"
-	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -176,7 +175,8 @@ func newTestInternal(remoteIP string, testID EthrTestID, clientParam EthrClientP
 
 	test, found := session.tests[testID]
 	if found {
-		return test, os.ErrExist
+		session.testCount++
+		return test, nil //os.ErrExist
 	}
 	session.testCount++
 	test = &ethrTest{}

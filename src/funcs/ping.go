@@ -27,39 +27,17 @@ func PingTask(t g.NetworkMember, wg *sync.WaitGroup) {
 	seelog.Info("Start Ping " + t.Addr + "..")
 	stat := g.PingSt{}
 	stat.MinDelay = -1
-	lossPK := 0
+	// lossPK := 0
 	ipaddr, err := net.ResolveIPAddr("ip", t.Addr)
-	var delay float64 = 0.0
-	// var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	// var delay float64 = 0.0
 	if err == nil {
-		for i := 0; i < 8; i++ {
-			// force all target to use qperf ping.
-			delay, err = nettools.QperfPing(ipaddr.IP.String())
-			if err == nil {
-				stat.AvgDelay = stat.AvgDelay + delay
-				if stat.MaxDelay < delay {
-					stat.MaxDelay = delay
-				}
-				if stat.MinDelay == -1 || stat.MinDelay > delay {
-					stat.MinDelay = delay
-				}
-				stat.RevcPk = stat.RevcPk + 1
-				seelog.Debug("[func:StartPing qperf ping] ID:", i, " IP:", t.Addr)
-			} else {
-				seelog.Debug("[func:StartPing qperf ping] ID:", i, " IP:", t.Addr, "| err:", err)
-				lossPK = lossPK + 1
-			}
-			stat.SendPk = stat.SendPk + 1
-			stat.LossPk = int((float64(lossPK) / float64(stat.SendPk)) * 100)
-			var duration = 1500 //rnd.Intn(1500)
-			time.Sleep(time.Duration(time.Duration.Milliseconds(time.Duration(duration))))
-		}
-		if stat.RevcPk > 0 {
-			stat.AvgDelay = stat.AvgDelay / float64(stat.RevcPk)
-		} else {
-			stat.AvgDelay = 0.0
-		}
-		seelog.Debug("[func:qperf ping] Finish Addr:", t.Addr, " MaxDelay:", stat.MaxDelay, " MinDelay:", stat.MinDelay, " AvgDelay:", stat.AvgDelay, " Revc:", stat.RevcPk, " LossPK:", stat.LossPk)
+		sent, rcvd, lost, avg, min, max := nettools.EthrPing(ipaddr.IP.String(), 8888)
+		stat.SendPk = int(sent)
+		stat.RevcPk = int(rcvd)
+		stat.LossPk = int(lost)
+		stat.AvgDelay = float64(avg.Nanoseconds()) / 1e6
+		stat.MinDelay = float64(min.Nanoseconds()) / 1e6
+		stat.MaxDelay = float64(max.Nanoseconds()) / 1e6
 	} else {
 		stat.AvgDelay = 0.00
 		stat.MinDelay = 0.00

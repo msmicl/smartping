@@ -37,7 +37,7 @@ func showAcceptedIPVersion() {
 	ui.printMsg("Accepting IP version: %s", ipVerString)
 }
 
-func RunServer(serverParam ethrServerParam) {
+func runServer(serverParam ethrServerParam) {
 	defer stopStatsTimer()
 	initServer(serverParam.showUI)
 	startStatsTimer()
@@ -45,6 +45,8 @@ func RunServer(serverParam ethrServerParam) {
 	showAcceptedIPVersion()
 	ui.printMsg("Listening on port %d for TCP & UDP", gEthrPort)
 	srvrRunUDPServer()
+	gLocalIP = "127.0.0.1"
+	gEthrPortStr = fmt.Sprintf("%d", gEthrPort)
 	err := srvrRunTCPServer()
 	if err != nil {
 		finiServer()

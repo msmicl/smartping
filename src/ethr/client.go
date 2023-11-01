@@ -117,6 +117,102 @@ func getServerIPandPort(server string) (string, string, string, error) {
 	return hostName, hostIP, port, err
 }
 
+// This function is used for smartping only.
+func runSmartPingClient(testID EthrTestID, title string, clientParam EthrClientParam, server string) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	initClient(title)
+	hostName, hostIP, port, err := getServerIPandPort(server)
+	if err != nil {
+		return 0, 0, 0, 0, 0, 0
+	}
+	ip := net.ParseIP(hostIP)
+	if ip != nil {
+		if ip.To4() != nil {
+			gIPVersion = ethrIPv4
+		} else {
+			gIPVersion = ethrIPv6
+		}
+	} else {
+		return 0, 0, 0, 0, 0, 0
+	}
+	if port == "" {
+		port = "8888" // default port
+	}
+	ui.printMsg("Using destination: %s, ip: %s, port: %s", hostName, hostIP, port)
+	test, err := newTest(hostIP, testID, clientParam)
+	if err != nil {
+		ui.printErr("Failed to create the new test.")
+		safeDeleteTest(test)
+		return 0, 0, 0, 0, 0, 0
+	}
+	test.remoteAddr = server
+	test.remoteIP = hostIP
+	test.remotePort = port
+	if testID.Protocol == ICMP {
+		test.dialAddr = hostIP
+	} else {
+		test.dialAddr = fmt.Sprintf("[%s]:%s", hostIP, port)
+	}
+	return runSmartPingTest(test)
+}
+
+// This function is used for smartping only.
+func runSmartPingTest(test *ethrTest) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	toStop := make(chan int, 16)
+	startStatsTimer()
+	gap := test.clientParam.Gap
+	duration := test.clientParam.Duration
+	runDurationTimer(duration, toStop)
+	test.isActive = true
+
+	sent, rcvd, lost, avg, min, max := clientRunSmartPingTest(test, gap, test.clientParam.WarmupCount)
+
+	handleInterrupt(toStop)
+	stopStatsTimer()
+	// close(test.done)
+	safeDeleteTest(test)
+	if test.testID.Type == Ping {
+		time.Sleep(2 * time.Second)
+	}
+	return sent, rcvd, lost, avg, min, max
+}
+
+// This function is used for smartping only.
+func clientRunSmartPingTest(test *ethrTest, g time.Duration, warmupCount uint32) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	// TODO: Override NumThreads for now, fix it later to support parallel
+	// threads.
+	test.clientParam.NumThreads = 1
+	var sent, rcvd, lost uint32
+	var avg, min, max time.Duration
+	warmupText := "[warmup] "
+	latencyNumbers := make([]time.Duration, 0)
+	for th := uint32(0); th < test.clientParam.NumThreads; th++ {
+		totalCount := warmupCount + 20
+		for i := uint32(0); i < totalCount; i++ {
+			// t0 := time.Now()
+			if warmupCount > 0 {
+				warmupCount--
+				clientRunPing(test, warmupText)
+			} else {
+				sent++
+				latency, err := clientRunPing(test, "")
+				if err == nil {
+					rcvd++
+					latencyNumbers = append(latencyNumbers, latency)
+				} else {
+					lost++
+				}
+			}
+			// t1 := time.Since(t0)
+			// if t1 < g {
+			// 	time.Sleep(g - t1)
+			// }
+			time.Sleep(200 * time.Millisecond)
+		}
+	}
+	avg, min, max = printConnectionLatencyResults(test.dialAddr, test, sent, rcvd, lost, latencyNumbers)
+	return sent, rcvd, lost, avg, min, max
+}
+
 func runClient(testID EthrTestID, title string, clientParam EthrClientParam, server string) {
 	initClient(title)
 	hostName, hostIP, port, err := getServerIPandPort(server)
@@ -353,7 +449,7 @@ ExitForLoop:
 	}
 }
 
-func calcAndPrintLatency(test *ethrTest, rttCount uint32, latencyNumbers []time.Duration) {
+func calcAndPrintLatency(test *ethrTest, rttCount uint32, latencyNumbers []time.Duration) (time.Duration, time.Duration, time.Duration) {
 	sum := int64(0)
 	for _, d := range latencyNumbers {
 		sum += d.Nanoseconds()
@@ -384,6 +480,7 @@ func calcAndPrintLatency(test *ethrTest, rttCount uint32, latencyNumbers []time.
 		test.session.remoteIP,
 		protoToString(test.testID.Protocol),
 		avg, min, max, p50, p90, p95, p99, p999, p9999)
+	return avg, min, max
 }
 
 func tcpRunCpsTest(test *ethrTest) {
@@ -485,15 +582,17 @@ func tcpRunPing(test *ethrTest, prefix string) (timeTaken time.Duration, err err
 	return
 }
 
-func printConnectionLatencyResults(server string, test *ethrTest, sent, rcvd, lost uint32, latencyNumbers []time.Duration) {
+func printConnectionLatencyResults(server string, test *ethrTest, sent, rcvd, lost uint32, latencyNumbers []time.Duration) (time.Duration, time.Duration, time.Duration) {
 	fmt.Println("-----------------------------------------------------------------------------------------")
 	ui.printMsg("TCP connect statistics for %s:", server)
 	ui.printMsg("  Sent = %d, Received = %d, Lost = %d", sent, rcvd, lost)
 	if rcvd > 0 {
 		ui.emitLatencyHdr()
-		calcAndPrintLatency(test, rcvd, latencyNumbers)
+		avg, min, max := calcAndPrintLatency(test, rcvd, latencyNumbers)
 		fmt.Println("-----------------------------------------------------------------------------------------")
+		return avg, min, max
 	}
+	return time.Duration(0), time.Duration(0), time.Duration(0)
 }
 
 func tcpRunTraceRoute(test *ethrTest, gap time.Duration, toStop chan int) {

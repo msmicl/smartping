@@ -39,7 +39,6 @@ func main() {
 		go funcs.ClearArchive()
 	}, "mtc")
 	c.Start()
-	go nettools.StartQperfAsServer()
-	go nettools.CheckQperfStatus()
+	go nettools.StartEthrServer()
 	http.StartHttp()
 }
