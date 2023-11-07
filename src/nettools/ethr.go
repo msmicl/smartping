@@ -15,7 +15,3 @@ func StartEthrServer() {
 func EthrPing(ip string, port int) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
 	return ethr.EthrPing(ip, port)
 }
-
-func EthrProb(port int) bool {
-	return true
-}

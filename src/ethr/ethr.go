@@ -39,13 +39,17 @@ func StartEthrService(port int) {
 
 func EthrPing(ipAddress string, port int) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
 	var destination = ipAddress
-	var testType = getTestType("pi")
+	// for ping test
+	// var testType = getTestType("pi")
+	// For tcp latency test
+	var testType = getTestType("l")
 	var proto = getProtocol("tcp")
 
 	var testId = EthrTestID{EthrProtocol(proto), testType}
+	// For tcp latency test
 	clientParam := EthrClientParam{
 		1,
-		16000,
+		1,
 		1000,
 		false,
 		10000000000,
@@ -56,7 +60,7 @@ func EthrPing(ipAddress string, port int) (uint32, uint32, uint32, time.Duration
 	validateClientParams(testId, clientParam)
 
 	rServer := destination
-	return runSmartPingClient(testId, "", clientParam, rServer+":"+strconv.Itoa(port))
+	return runSmartPingTcpLatencyClient(testId, "", clientParam, rServer+":"+strconv.Itoa(port))
 }
 
 func main() {

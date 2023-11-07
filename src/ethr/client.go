@@ -213,6 +213,132 @@ func clientRunSmartPingTest(test *ethrTest, g time.Duration, warmupCount uint32)
 	return sent, rcvd, lost, avg, min, max
 }
 
+// This function is used for smartping only.
+func runSmartPingTcpLatencyClient(testID EthrTestID, title string, clientParam EthrClientParam, server string) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	initClient(title)
+	hostName, hostIP, port, err := getServerIPandPort(server)
+	if err != nil {
+		return 0, 0, 0, 0, 0, 0
+	}
+	ip := net.ParseIP(hostIP)
+	if ip != nil {
+		if ip.To4() != nil {
+			gIPVersion = ethrIPv4
+		} else {
+			gIPVersion = ethrIPv6
+		}
+	} else {
+		return 0, 0, 0, 0, 0, 0
+	}
+	if port == "" {
+		port = "8888" // default port
+	}
+	ui.printMsg("Using destination: %s, ip: %s, port: %s", hostName, hostIP, port)
+	test, err := newTest(hostIP, testID, clientParam)
+	if err != nil {
+		ui.printErr("Failed to create the new test.")
+		safeDeleteTest(test)
+		return 0, 0, 0, 0, 0, 0
+	}
+	test.remoteAddr = server
+	test.remoteIP = hostIP
+	test.remotePort = port
+	if testID.Protocol == ICMP {
+		test.dialAddr = hostIP
+	} else {
+		test.dialAddr = fmt.Sprintf("[%s]:%s", hostIP, port)
+	}
+	return runSmartPingTcpLatencyTest(test)
+}
+
+// This function is used for smartping only.
+func runSmartPingTcpLatencyTest(test *ethrTest) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	toStop := make(chan int, 16)
+	startStatsTimer()
+	gap := test.clientParam.Gap
+	duration := test.clientParam.Duration
+	runDurationTimer(duration, toStop)
+	test.isActive = true
+
+	sent, rcvd, lost, avg, min, max := clientRunSmartPingTcpLatencyTest(test, gap, test.clientParam.WarmupCount)
+
+	handleInterrupt(toStop)
+	stopStatsTimer()
+	// close(test.done)
+	safeDeleteTest(test)
+	if test.testID.Type == Ping {
+		time.Sleep(2 * time.Second)
+	}
+	return sent, rcvd, lost, avg, min, max
+}
+
+// This function is used for smartping only.
+func clientRunSmartPingTcpLatencyTest(test *ethrTest, g time.Duration, warmupCount uint32) (uint32, uint32, uint32, time.Duration, time.Duration, time.Duration) {
+	// TODO: Override NumThreads for now, fix it later to support parallel
+	// threads.
+	ui.printMsg("Running latency test: %v, %v", test.clientParam.RttCount, test.clientParam.BufferSize)
+	conn, err := ethrDial(TCP, test.dialAddr)
+	if err != nil {
+		ui.printErr("Error dialing the latency connection: %v", err)
+		return 0, 0, 0, 0, 0, 0
+	}
+	defer conn.Close()
+	err = handshakeWithServer(test, conn)
+	if err != nil {
+		ui.printErr("Failed in handshake with the server. Error: %v", err)
+		return 0, 0, 0, 0, 0, 0
+	}
+	ui.emitLatencyHdr()
+	buffSize := test.clientParam.BufferSize
+	buffSize = 1
+	buff := make([]byte, buffSize)
+	for i := uint32(0); i < buffSize; i++ {
+		buff[i] = byte(i)
+	}
+	blen := len(buff)
+	// rttCount := test.clientParam.RttCount
+	// latencyNumbers := make([]time.Duration, rttCount)
+	var sent, rcvd, lost uint32
+	var avg, min, max time.Duration
+	latencyNumbers := make([]time.Duration, 20)
+	for th := uint32(0); th < test.clientParam.NumThreads; th++ {
+		totalCount := warmupCount + 20
+		for i := uint32(0); i < totalCount; i++ {
+			if warmupCount > 0 {
+				warmupCount--
+				n, err := conn.Write(buff)
+				if err != nil || n < blen {
+					ui.printDbg("Error sending/receiving data on a connection for latency test: %v", err)
+					rcvd = 0
+					lost = 20
+					break
+				}
+			} else {
+				sent++
+				s1 := time.Now()
+				n, err := conn.Write(buff)
+				if err != nil || n < blen {
+					ui.printDbg("Error sending/receiving data on a connection for latency test: %v", err)
+					lost++
+					continue
+				}
+				_, err = io.ReadFull(conn, buff)
+				if err != nil {
+					ui.printDbg("Error sending/receiving data on a connection for latency test: %v", err)
+					lost++
+					continue
+				}
+				e2 := time.Since(s1)
+				latencyNumbers[i-1] = e2
+				rcvd++
+			}
+
+		}
+	}
+	avg, min, max = printConnectionLatencyResults(test.dialAddr, test, sent, rcvd, lost, latencyNumbers)
+	return sent, rcvd, lost, avg, min, max
+}
+
 func runClient(testID EthrTestID, title string, clientParam EthrClientParam, server string) {
 	initClient(title)
 	hostName, hostIP, port, err := getServerIPandPort(server)
