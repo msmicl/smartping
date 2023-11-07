@@ -122,7 +122,7 @@ func runSmartPingClient(testID EthrTestID, title string, clientParam EthrClientP
 	initClient(title)
 	hostName, hostIP, port, err := getServerIPandPort(server)
 	if err != nil {
-		return 0, 0, 0, 0, 0, 0
+		return 20, 0, 20, 0, 0, 0
 	}
 	ip := net.ParseIP(hostIP)
 	if ip != nil {
@@ -132,7 +132,7 @@ func runSmartPingClient(testID EthrTestID, title string, clientParam EthrClientP
 			gIPVersion = ethrIPv6
 		}
 	} else {
-		return 0, 0, 0, 0, 0, 0
+		return 20, 0, 20, 0, 0, 0
 	}
 	if port == "" {
 		port = "8888" // default port
@@ -142,7 +142,7 @@ func runSmartPingClient(testID EthrTestID, title string, clientParam EthrClientP
 	if err != nil {
 		ui.printErr("Failed to create the new test.")
 		safeDeleteTest(test)
-		return 0, 0, 0, 0, 0, 0
+		return 20, 0, 20, 0, 0, 0
 	}
 	test.remoteAddr = server
 	test.remoteIP = hostIP
