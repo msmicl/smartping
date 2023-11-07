@@ -280,13 +280,13 @@ func clientRunSmartPingTcpLatencyTest(test *ethrTest, g time.Duration, warmupCou
 	conn, err := ethrDial(TCP, test.dialAddr)
 	if err != nil {
 		ui.printErr("Error dialing the latency connection: %v", err)
-		return 0, 0, 0, 0, 0, 0
+		return 20, 0, 20, 0, 0, 0
 	}
 	defer conn.Close()
 	err = handshakeWithServer(test, conn)
 	if err != nil {
 		ui.printErr("Failed in handshake with the server. Error: %v", err)
-		return 0, 0, 0, 0, 0, 0
+		return 20, 0, 20, 0, 0, 0
 	}
 	ui.emitLatencyHdr()
 	buffSize := test.clientParam.BufferSize
