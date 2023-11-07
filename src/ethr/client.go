@@ -296,13 +296,12 @@ func clientRunSmartPingTcpLatencyTest(test *ethrTest, g time.Duration, warmupCou
 		buff[i] = byte(i)
 	}
 	blen := len(buff)
-	// rttCount := test.clientParam.RttCount
-	// latencyNumbers := make([]time.Duration, rttCount)
+	rttCount := test.clientParam.RttCount
+	latencyNumbers := make([]time.Duration, rttCount)
 	var sent, rcvd, lost uint32
 	var avg, min, max time.Duration
-	latencyNumbers := make([]time.Duration, 20)
 	for th := uint32(0); th < test.clientParam.NumThreads; th++ {
-		totalCount := warmupCount + 20
+		totalCount := warmupCount + rttCount
 		for i := uint32(0); i < totalCount; i++ {
 			if warmupCount > 0 {
 				warmupCount--
@@ -310,7 +309,7 @@ func clientRunSmartPingTcpLatencyTest(test *ethrTest, g time.Duration, warmupCou
 				if err != nil || n < blen {
 					ui.printDbg("Error sending/receiving data on a connection for latency test: %v", err)
 					rcvd = 0
-					lost = 20
+					lost = rttCount
 					break
 				}
 			} else {

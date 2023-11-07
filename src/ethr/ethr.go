@@ -50,7 +50,7 @@ func EthrPing(ipAddress string, port int) (uint32, uint32, uint32, time.Duration
 	clientParam := EthrClientParam{
 		1,
 		1,
-		1000,
+		20,
 		false,
 		10000000000,
 		10000000000,
